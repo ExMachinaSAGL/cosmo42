@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Database, MessageSquare, Plus, PanelLeftClose, MoreVertical, Edit2, Trash2 } from 'lucide-react';
+import { Database, MessageSquare, Plus, PanelLeftClose, MoreVertical, Edit2, Trash2, Moon, Sun } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import logo from '../assets/Cosmo42logo_128x128.jpg';
@@ -15,7 +15,16 @@ export function Sidebar() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<{ type: 'rename' | 'delete', chatId: string, currentTitle?: string } | null>(null);
   const [newTitle, setNewTitle] = useState('');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const storedTheme = localStorage.getItem('cosmo42-theme');
+    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
+    return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   useEffect(() => {
     const handleClickOutside = () => setOpenMenuId(null);
@@ -59,6 +68,14 @@ export function Sidebar() {
 
   const handleNewChat = () => {
     navigate('/chat');
+  };
+
+  const toggleTheme = () => {
+    setTheme(currentTheme => {
+      const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      localStorage.setItem('cosmo42-theme', nextTheme);
+      return nextTheme;
+    });
   };
 
   const openRenameModal = (chatId: string, currentTitle: string) => {
@@ -112,20 +129,33 @@ export function Sidebar() {
       <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           {isCollapsed ? (
-            <button onClick={() => setIsCollapsed(false)} className="sidebar-logo-button" title="Expand Sidebar">
+            <button onClick={() => setIsCollapsed(false)} className="sidebar-logo-button" title="Expand Sidebar" aria-label="Expand sidebar">
               <img src={logo} alt="Cosmo42 Logo" className="sidebar-logo" />
             </button>
           ) : (
             <img src={logo} alt="Cosmo42 Logo" className="sidebar-logo" />
           )}
           {!isCollapsed && (
-            <button onClick={() => setIsCollapsed(true)} className="sidebar-toggle-top" title="Reduce Sidebar">
+            <button onClick={() => setIsCollapsed(true)} className="sidebar-toggle-top" title="Reduce Sidebar" aria-label="Collapse sidebar">
               <PanelLeftClose size={18} />
             </button>
           )}
         </div>
 
         <nav className="sidebar-nav">
+
+          <div>
+            <button
+              type="button"
+              className={`sidebar-theme-toggle ${isCollapsed ? 'collapsed' : ''}`}
+              onClick={toggleTheme}
+              aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+              title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+            >
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+              {!isCollapsed && <span>{theme === 'dark' ? 'Light theme' : 'Dark theme'}</span>}
+            </button>
+          </div>
 
           <div>
             <NavLink to="/kb" className={({ isActive }) => `sidebar-nav-link ${isCollapsed ? 'justify-center' : ''} ${isActive ? 'active' : ''}`} title="Knowledge Base">
@@ -137,13 +167,13 @@ export function Sidebar() {
           <div>
             <div className={`sidebar-section-header ${isCollapsed ? 'justify-center' : ''}`}>
               {isCollapsed ? (
-                <button onClick={handleNewChat} className="sidebar-new-chat-button" title="New Chat">
+                <button onClick={handleNewChat} className="sidebar-new-chat-button" title="New Chat" aria-label="New chat">
                   <MessageSquare size={16}/>
                 </button>
               ) : (
                 <>
                   <h2 className="sidebar-section-title">Chats</h2>
-                  <button onClick={handleNewChat} className="sidebar-new-chat-button" title="New Chat">
+                  <button onClick={handleNewChat} className="sidebar-new-chat-button" title="New Chat" aria-label="New chat">
                     <Plus size={16}/>
                   </button>
                 </>
@@ -162,6 +192,7 @@ export function Sidebar() {
                         onClick={(e) => toggleMenu(e, chat.uuid)} 
                         className="sidebar-action-btn"
                         title="Options"
+                        aria-label={`Options for ${chat.title}`}
                       >
                         <MoreVertical size={16} />
                       </button>
@@ -193,12 +224,15 @@ export function Sidebar() {
           confirmText={modalContent.type === 'rename' ? 'Rename' : 'Delete'}
         >
           {modalContent.type === 'rename' ? (
-            <input
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              className="modal-input"
-            />
+            <label className="modal-field">
+              <span className="modal-label">Chat title</span>
+              <input
+                type="text"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="modal-input"
+              />
+            </label>
           ) : (
             <p>Are you sure you want to delete this chat?</p>
           )}
