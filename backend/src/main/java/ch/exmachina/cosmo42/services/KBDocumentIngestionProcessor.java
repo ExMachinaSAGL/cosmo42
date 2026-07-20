@@ -128,30 +128,31 @@ public class KBDocumentIngestionProcessor {
 
     private void embedAndStore(IngestionJob job) {
         KBDocument kbDocument = kbDocumentRepository.findByUuid(job.getKbDocumentUuid()).orElseThrow();
-        List<DocumentPage> mergedPages = kbDocumentChunker.mergePages(ingestionJobService.loadCompletedPages(job));
+        List<Map.Entry<Integer, DocumentPage>> mergedPages = kbDocumentChunker.mergePages(ingestionJobService.loadCompletedPages(job));
         kbDocumentChunkRepository.deleteByKbDocument_Uuid(kbDocument.getUuid());
         embedAndSaveChunks(kbDocument, mergedPages);
         ingestionJobService.clearCompletedPagesChunksJson(job);
     }
 
-    private void embedAndSaveChunks(KBDocument kbDocument, List<DocumentPage> pages) {
+    private void embedAndSaveChunks(KBDocument kbDocument, List<Map.Entry<Integer, DocumentPage>> pages) {
         List<KBDocumentChunk> chunks = new ArrayList<>();
         List<String> toEmbed = new ArrayList<>();
 
-        for (DocumentPage page : pages) {
+        for (Map.Entry<Integer, DocumentPage> indexedPage : pages) {
+        	var page = indexedPage.getValue();
             for (Chunk chunk : page.getChunks()) {
                 KBDocumentChunk kbChunk = new KBDocumentChunk();
                 kbChunk.setUuid(UUID.randomUUID().toString());
                 kbChunk.setKbDocument(kbDocument);
-                kbChunk.setType(KBDocumentChunkType.fromLabel(chunk.getType(), KBDocumentChunkType.TEXT));
+                kbChunk.setType(KBDocumentChunkType.fromLabel(chunk.getType().name(), KBDocumentChunkType.TEXT));
                 kbChunk.setContent(chunk.getContent());
                 kbChunk.setSummary(chunk.getSummary());
 
                 boolean isTable = kbChunk.getType() == KBDocumentChunkType.TABLE;
-                if(isTable && kbChunk.getSummary() != null) {
+                if(isTable) {
                     chunks.add(kbChunk);
-                    toEmbed.add(kbChunk.getSummary());
-                } else if(!isTable && kbChunk.getContent() != null) {
+                    toEmbed.add(joinTexts(kbChunk.getSummary(), kbChunk.getContent()));
+                } else if(kbChunk.getContent() != null) {
                     chunks.add(kbChunk);
                     toEmbed.add(kbChunk.getContent());
                 }
@@ -166,13 +167,19 @@ public class KBDocumentIngestionProcessor {
         } catch (Exception e) {
             throw new RuntimeException("Embedding model call failed for document " + kbDocument.getUuid(), e);
         }
-        for (int i = 0; i < chunks.size(); i++) {
-            chunks.get(i).setEmbedding(response.getResults().get(i).getOutput());
+        for(var embedding : response.getResults()) {
+        	chunks.get(embedding.getIndex()).setEmbedding(embedding.getOutput());
         }
         kbDocumentChunkRepository.saveAll(chunks);
         log.info("Saved {} chunks for document {}.", chunks.size(), kbDocument.getUuid());
     }
 
+	private String joinTexts(String left, String right) {
+        if (left == null) return right;
+        if (right == null) return left;
+        return left + "\n" + right;
+	}
+	
     private IngestionJob refresh(String jobUuid) {
         return ingestionJobService.findByUuid(jobUuid).orElseThrow();
     }

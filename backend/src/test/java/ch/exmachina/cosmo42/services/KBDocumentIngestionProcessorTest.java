@@ -11,6 +11,7 @@ import ch.exmachina.cosmo42.services.fs.FileService;
 import ch.exmachina.cosmo42.services.kb.FileConverter;
 import ch.exmachina.cosmo42.services.kb.KBDocumentChunker;
 import ch.exmachina.cosmo42.services.kb.schema.Chunk;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 import ch.exmachina.cosmo42.services.kb.schema.DocumentPage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -96,14 +98,14 @@ class KBDocumentIngestionProcessorTest {
 
         doAnswer(inv -> {
             BiConsumer<Integer, DocumentPage> cb = inv.getArgument(2);
-            cb.accept(0, new DocumentPage(List.of(new Chunk("text", "a", null, false))));
-            cb.accept(1, new DocumentPage(List.of(new Chunk("text", "b", null, false))));
+            cb.accept(0, new DocumentPage(List.of(new Chunk(ChunkType.text, "a", null, false))));
+            cb.accept(1, new DocumentPage(List.of(new Chunk(ChunkType.text, "b", null, false))));
             return null;
         }).when(kbDocumentChunker).processPages(any(), any(), any());
         when(ingestionJobService.countExhaustedFailures(any(), eq(MAX_ATTEMPTS))).thenReturn(0L);
         when(ingestionJobService.loadCompletedPages(any())).thenReturn(List.of(
-                new DocumentPage(List.of(new Chunk("text", "a", null, false))),
-                new DocumentPage(List.of(new Chunk("text", "b", null, false)))));
+                entry(1, new DocumentPage(List.of(new Chunk(ChunkType.text, "a", null, false)))),
+                entry(2, new DocumentPage(List.of(new Chunk(ChunkType.text, "b", null, false))))));
         when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> inv.getArgument(0));
         when(kbDocumentRepository.findByUuid(anyString())).thenReturn(Optional.of(kbDoc("stored-uuid")));
         when(embeddingModel.call(any(EmbeddingRequest.class))).thenReturn(embedResponse(2));
@@ -225,7 +227,7 @@ class KBDocumentIngestionProcessorTest {
                 .thenReturn(new LinkedHashSet<>());
         when(ingestionJobService.countExhaustedFailures(any(), eq(MAX_ATTEMPTS))).thenReturn(0L);
         when(ingestionJobService.loadCompletedPages(any())).thenReturn(List.of(
-                new DocumentPage(List.of(new Chunk("table", "| a |", "tbl-summary", false)))));
+                entry(1, new DocumentPage(List.of(new Chunk(ChunkType.table, "| a |", "tbl-summary", false))))));
         when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> inv.getArgument(0));
         when(kbDocumentRepository.findByUuid("kb-uuid")).thenReturn(Optional.of(kbDoc("kb-uuid")));
         when(embeddingModel.call(any(EmbeddingRequest.class))).thenReturn(embedResponse(1));
@@ -234,7 +236,7 @@ class KBDocumentIngestionProcessorTest {
 
         ArgumentCaptor<EmbeddingRequest> captor = ArgumentCaptor.forClass(EmbeddingRequest.class);
         verify(embeddingModel).call(captor.capture());
-        assertThat(captor.getValue().getInstructions()).containsExactly("tbl-summary");
+        assertThat(captor.getValue().getInstructions()).containsExactly("tbl-summary\n| a |");
     }
 
     private IngestionJob newJob(String uuid, String name) {

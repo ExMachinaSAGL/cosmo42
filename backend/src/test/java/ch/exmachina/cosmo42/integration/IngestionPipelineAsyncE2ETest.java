@@ -10,6 +10,7 @@ import ch.exmachina.cosmo42.repositories.KBDocumentRepository;
 import ch.exmachina.cosmo42.services.kb.FileConverter;
 import ch.exmachina.cosmo42.services.kb.KBDocumentChunker;
 import ch.exmachina.cosmo42.services.kb.schema.Chunk;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 import ch.exmachina.cosmo42.services.kb.schema.DocumentPage;
 import ch.exmachina.cosmo42.testsupport.EmbeddingMocks;
 import org.junit.jupiter.api.AfterEach;
@@ -171,7 +172,7 @@ class IngestionPipelineAsyncE2ETest extends AbstractWebIntegrationTest {
 
     private static Chunk textChunk(String content) {
         Chunk c = new Chunk();
-        c.setType("text");
+        c.setType(ChunkType.text);
         c.setContent(content);
         c.setContinuesOnNextPage(false);
         return c;
