@@ -171,8 +171,8 @@ class KBDocumentChunkerTest {
         var result = chunker.mergePages(List.of(entry(1, page1), entry(2, page2)));
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContent()).isEqualTo("hello");
-        assertThat(result.get(1).getValue().getChunks().getFirst().getContent()).isEqualTo("world");
+        assertThat(result.get(0).getChunks().getFirst().getContent()).isEqualTo("hello");
+        assertThat(result.get(1).getChunks().getFirst().getContent()).isEqualTo("world");
     }
 
     private void stubStreamResponse(String json) {

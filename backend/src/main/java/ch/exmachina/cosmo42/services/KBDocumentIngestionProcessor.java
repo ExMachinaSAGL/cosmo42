@@ -128,18 +128,17 @@ public class KBDocumentIngestionProcessor {
 
     private void embedAndStore(IngestionJob job) {
         KBDocument kbDocument = kbDocumentRepository.findByUuid(job.getKbDocumentUuid()).orElseThrow();
-        List<Map.Entry<Integer, DocumentPage>> mergedPages = kbDocumentChunker.mergePages(ingestionJobService.loadCompletedPages(job));
+        List<DocumentPage> mergedPages = kbDocumentChunker.mergePages(ingestionJobService.loadCompletedPages(job));
         kbDocumentChunkRepository.deleteByKbDocument_Uuid(kbDocument.getUuid());
         embedAndSaveChunks(kbDocument, mergedPages);
         ingestionJobService.clearCompletedPagesChunksJson(job);
     }
 
-    private void embedAndSaveChunks(KBDocument kbDocument, List<Map.Entry<Integer, DocumentPage>> pages) {
+    private void embedAndSaveChunks(KBDocument kbDocument, List<DocumentPage> pages) {
         List<KBDocumentChunk> chunks = new ArrayList<>();
         List<String> toEmbed = new ArrayList<>();
 
-        for (Map.Entry<Integer, DocumentPage> indexedPage : pages) {
-        	var page = indexedPage.getValue();
+        for (var page : pages) {
             for (Chunk chunk : page.getChunks()) {
                 KBDocumentChunk kbChunk = new KBDocumentChunk();
                 kbChunk.setUuid(UUID.randomUUID().toString());
@@ -151,7 +150,7 @@ public class KBDocumentIngestionProcessor {
                 boolean isTable = kbChunk.getType() == KBDocumentChunkType.TABLE;
                 if(isTable) {
                     chunks.add(kbChunk);
-                    toEmbed.add(joinTexts(kbChunk.getSummary(), kbChunk.getContent()));
+                    toEmbed.add(kbChunk.getSummary());
                 } else if(kbChunk.getContent() != null) {
                     chunks.add(kbChunk);
                     toEmbed.add(kbChunk.getContent());
@@ -173,12 +172,6 @@ public class KBDocumentIngestionProcessor {
         kbDocumentChunkRepository.saveAll(chunks);
         log.info("Saved {} chunks for document {}.", chunks.size(), kbDocument.getUuid());
     }
-
-	private String joinTexts(String left, String right) {
-        if (left == null) return right;
-        if (right == null) return left;
-        return left + "\n" + right;
-	}
 	
     private IngestionJob refresh(String jobUuid) {
         return ingestionJobService.findByUuid(jobUuid).orElseThrow();

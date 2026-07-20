@@ -146,20 +146,20 @@ public class KBDocumentChunker {
     	return page;
     }
 
-	public List<Map.Entry<Integer, DocumentPage>> mergePages(List<Map.Entry<Integer, DocumentPage>> orderedPages) {
+	public List<DocumentPage> mergePages(List<Map.Entry<Integer, DocumentPage>> orderedPages) {
 		orderedPages = orderedPages.stream()
 				.filter(this::valid)
 				.sorted(comparing(Map.Entry::getKey))
 				.toList();
 
-		List<Map.Entry<Integer, DocumentPage>> merged = new ArrayList<>();
+		List<DocumentPage> merged = new ArrayList<>();
 
 		for (int i = 0; i < orderedPages.size(); i++) {
 			var page = orderedPages.get(i);
 			var source = page.getValue();
 			List<Chunk> chunks = source.getChunks();
 			if (chunks.isEmpty()) {
-				merged.add(page);
+				merged.add(page.getValue());
 				continue;
 			}
 			List<Chunk> outChunks = chunks.stream().limit(chunks.size() - 1).collect(toList());
@@ -168,7 +168,7 @@ public class KBDocumentChunker {
 				lastChunk = joinConitnuingChunks(lastChunk, i, orderedPages);
 			}
 			outChunks.add(lastChunk);
-			merged.add(Map.entry(page.getKey(), new DocumentPage(outChunks)));
+			merged.add(new DocumentPage(outChunks));
 		}
 		return merged;
 	}

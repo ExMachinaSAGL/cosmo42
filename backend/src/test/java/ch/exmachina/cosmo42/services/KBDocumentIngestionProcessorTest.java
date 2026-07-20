@@ -28,6 +28,7 @@ import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -106,7 +107,7 @@ class KBDocumentIngestionProcessorTest {
         when(ingestionJobService.loadCompletedPages(any())).thenReturn(List.of(
                 entry(1, new DocumentPage(List.of(new Chunk(ChunkType.text, "a", null, false)))),
                 entry(2, new DocumentPage(List.of(new Chunk(ChunkType.text, "b", null, false))))));
-        when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> ((List<Map.Entry>)inv.getArgument(0)).stream().map(Map.Entry::getValue).toList());
         when(kbDocumentRepository.findByUuid(anyString())).thenReturn(Optional.of(kbDoc("stored-uuid")));
         when(embeddingModel.call(any(EmbeddingRequest.class))).thenReturn(embedResponse(2));
 
@@ -228,7 +229,7 @@ class KBDocumentIngestionProcessorTest {
         when(ingestionJobService.countExhaustedFailures(any(), eq(MAX_ATTEMPTS))).thenReturn(0L);
         when(ingestionJobService.loadCompletedPages(any())).thenReturn(List.of(
                 entry(1, new DocumentPage(List.of(new Chunk(ChunkType.table, "| a |", "tbl-summary", false))))));
-        when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> ((List<Map.Entry>)inv.getArgument(0)).stream().map(Map.Entry::getValue).toList());
         when(kbDocumentRepository.findByUuid("kb-uuid")).thenReturn(Optional.of(kbDoc("kb-uuid")));
         when(embeddingModel.call(any(EmbeddingRequest.class))).thenReturn(embedResponse(1));
 
@@ -236,7 +237,7 @@ class KBDocumentIngestionProcessorTest {
 
         ArgumentCaptor<EmbeddingRequest> captor = ArgumentCaptor.forClass(EmbeddingRequest.class);
         verify(embeddingModel).call(captor.capture());
-        assertThat(captor.getValue().getInstructions()).containsExactly("tbl-summary\n| a |");
+        assertThat(captor.getValue().getInstructions()).containsExactly("tbl-summary");
     }
 
     private IngestionJob newJob(String uuid, String name) {

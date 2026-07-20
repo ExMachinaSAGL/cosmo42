@@ -32,6 +32,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -161,7 +162,7 @@ class IngestionPipelineAsyncE2ETest extends AbstractWebIntegrationTest {
             onPageComplete.accept(1, pageOf(textChunk("page 2 body")));
             return null;
         }).when(kbDocumentChunker).processPages(any(), any(), any());
-        when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> ((List<Map.Entry>)inv.getArgument(0)).stream().map(Map.Entry::getValue).toList());
     }
 
     private static DocumentPage pageOf(Chunk... chunks) {

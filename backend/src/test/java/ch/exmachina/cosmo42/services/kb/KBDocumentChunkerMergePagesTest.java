@@ -36,8 +36,8 @@ class KBDocumentChunkerMergePagesTest {
         var result = chunker.mergePages(List.of(entry(1, page)));
 
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).getValue().getChunks()).hasSize(1);
-        assertThat(result.get(0).getValue().getChunks().get(0).getContent()).isEqualTo("hello");
+        assertThat(result.get(0).getChunks()).hasSize(1);
+        assertThat(result.get(0).getChunks().get(0).getContent()).isEqualTo("hello");
     }
 
     @Test
@@ -50,11 +50,11 @@ class KBDocumentChunkerMergePagesTest {
         var result = chunker.mergePages(List.of(entry(1, page1), entry(2, page2)));
 
         assertThat(result).hasSize(2);
-        assertThat(result.getFirst().getValue().getChunks()).hasSize(1);
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContent()).isEqualTo("begin end");
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContinuesOnNextPage()).isFalse();
-        assertThat(result.get(1).getValue().getChunks()).hasSize(1);
-        assertThat(result.get(1).getValue().getChunks().getFirst().getContent()).isEqualTo("second");
+        assertThat(result.getFirst().getChunks()).hasSize(1);
+        assertThat(result.get(0).getChunks().getFirst().getContent()).isEqualTo("begin end");
+        assertThat(result.get(0).getChunks().getFirst().getContinuesOnNextPage()).isFalse();
+        assertThat(result.get(1).getChunks()).hasSize(1);
+        assertThat(result.get(1).getChunks().getFirst().getContent()).isEqualTo("second");
     }
 
     @Test
@@ -64,8 +64,8 @@ class KBDocumentChunkerMergePagesTest {
 
         var result = chunker.mergePages(List.of(entry(1, page1), entry(2, page2)));
 
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContent()).isEqualTo("para");
-        assertThat(result.get(1).getValue().getChunks().getFirst().getContent()).isEqualTo("| a |");
+        assertThat(result.get(0).getChunks().getFirst().getContent()).isEqualTo("para");
+        assertThat(result.get(1).getChunks().getFirst().getContent()).isEqualTo("| a |");
     }
 
     @Test
@@ -76,10 +76,10 @@ class KBDocumentChunkerMergePagesTest {
 
         var result = chunker.mergePages(List.of(entry(1, page1), entry(2, page2), entry(3, page3)));
 
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContent()).isEqualTo("a b c");
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContinuesOnNextPage()).isFalse();
-        assertThat(result.get(1).getValue().getChunks()).isEmpty();
-        assertThat(result.get(2).getValue().getChunks()).isEmpty();
+        assertThat(result.get(0).getChunks().getFirst().getContent()).isEqualTo("a b c");
+        assertThat(result.get(0).getChunks().getFirst().getContinuesOnNextPage()).isFalse();
+        assertThat(result.get(1).getChunks()).isEmpty();
+        assertThat(result.get(2).getChunks()).isEmpty();
     }
     
     @Test
@@ -90,10 +90,10 @@ class KBDocumentChunkerMergePagesTest {
 
         var result = chunker.mergePages(List.of(entry(1, page1), entry(2, page2), entry(4, page4)));
 
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContent()).isEqualTo("a b");
-        assertThat(result.get(0).getValue().getChunks().getFirst().getContinuesOnNextPage()).isTrue();
-        assertThat(result.get(1).getValue().getChunks()).isEmpty();
-        assertThat(result.get(2).getValue().getChunks()).containsExactlyElementsOf(page4.getChunks());
+        assertThat(result.get(0).getChunks().getFirst().getContent()).isEqualTo("a b");
+        assertThat(result.get(0).getChunks().getFirst().getContinuesOnNextPage()).isTrue();
+        assertThat(result.get(1).getChunks()).isEmpty();
+        assertThat(result.get(2).getChunks()).containsExactlyElementsOf(page4.getChunks());
     }
 
     @Test
@@ -103,7 +103,7 @@ class KBDocumentChunkerMergePagesTest {
 
         var result = chunker.mergePages(List.of(entry(1, page1), entry(2, page2)));
 
-        Chunk merged = result.getFirst().getValue().getChunks().getFirst();
+        Chunk merged = result.getFirst().getChunks().getFirst();
         assertThat(merged.getContent()).isEqualTo("| row1 | | row2 |");
         assertThat(merged.getSummary()).isEqualTo("first half second half");
     }
@@ -116,7 +116,7 @@ class KBDocumentChunkerMergePagesTest {
         var result = chunker.mergePages(new ArrayList<>(List.of(entry(1, page1), entry(2, nullChunks))));
 
         assertThat(result).hasSize(1);
-        assertThat(result.getFirst().getValue().getChunks().getFirst().getContent()).isEqualTo("x");
+        assertThat(result.getFirst().getChunks().getFirst().getContent()).isEqualTo("x");
     }
 
     private static Chunk chunk(String type, String content, String summary, boolean continues) {
