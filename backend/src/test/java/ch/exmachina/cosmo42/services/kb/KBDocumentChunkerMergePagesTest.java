@@ -83,7 +83,7 @@ class KBDocumentChunkerMergePagesTest {
     }
     
     @Test
-    void mergePages_cutoffNotMergedIfNonContiguosPages_mergesAll() {
+    void mergePages_cutoffNotMergedIfNonContiguosPages() {
         DocumentPage page1 = pageWith(chunk("text", "a", null, true));
         DocumentPage page2 = pageWith(chunk("text", "b", null, true));
         DocumentPage page4 = pageWith(chunk("text", "c", null, false));
