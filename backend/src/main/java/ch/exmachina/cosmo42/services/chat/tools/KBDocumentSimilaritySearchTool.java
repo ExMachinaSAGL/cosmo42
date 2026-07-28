@@ -3,7 +3,6 @@ package ch.exmachina.cosmo42.services.chat.tools;
 import ch.exmachina.cosmo42.entities.KBDocumentChunk;
 import ch.exmachina.cosmo42.entities.converters.VectorAttributeConverter;
 import ch.exmachina.cosmo42.repositories.KBDocumentChunkRepository;
-import com.fasterxml.jackson.annotation.JsonPropertyDescription;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,6 +12,7 @@ import org.springframework.ai.embedding.EmbeddingRequest;
 import org.springframework.ai.embedding.EmbeddingResponse;
 import org.springframework.ai.openai.OpenAiEmbeddingOptions;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.ai.tool.annotation.ToolParam;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,11 +36,16 @@ public class KBDocumentSimilaritySearchTool extends BaseTool {
             (e.g., 'Cosmo42 system architecture specifications' or 'Q3 financial report summary' instead of 'what does the file say?' or 'tell me about the project').
             """)
     @Transactional(readOnly = true)
-    public KBSimilaritySearchResponse search(KBSimilaritySearchRequest request, ToolContext context) {
+    public KBSimilaritySearchResponse search(
+    		@ToolParam(
+    				description = "A specific, context-rich search query written in natural language, designed to retrieve the most semantically relevant documents.",
+    				required = true
+    		) String query, 
+    		ToolContext context) {
         emitStatus(context, "Searching Knowledge Base...");
 
         EmbeddingResponse embeddingResponse = embeddingModel.call(
-                new EmbeddingRequest(List.of(request.query()), embeddingModelOptions));
+                new EmbeddingRequest(List.of(query), embeddingModelOptions));
         float[] queryVector = embeddingResponse.getResults().getFirst().getOutput();
         byte[] bytesVector = vectorAttributeConverter.convertToDatabaseColumn(queryVector);
 
@@ -54,12 +59,6 @@ public class KBDocumentSimilaritySearchTool extends BaseTool {
                 .toList();
         return new KBSimilaritySearchResponse(chunkDTOs);
     }
-
-    public record KBSimilaritySearchRequest(
-            @JsonPropertyDescription("A specific, context-rich search query written in natural language, designed to retrieve the most semantically relevant documents.")
-            String query
-    ) {}
-
     public record KBSimilaritySearchResponse(List<ChunkDTO> chunks) {}
 
     public record ChunkDTO(String fileName, String uuid, String content) {}
