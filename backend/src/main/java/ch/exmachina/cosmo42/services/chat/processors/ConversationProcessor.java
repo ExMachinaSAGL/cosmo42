@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.api.Advisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.model.ChatResponse;
@@ -66,7 +67,7 @@ public class ConversationProcessor implements ChatProcessor {
         // and the aggregated assistant response (in after, via ChatClientMessageAggregator).
         // No explicit chatMemory.add() needed at the end of the stream.
         MessageChatMemoryAdvisor chatMemoryAdvisor = MessageChatMemoryAdvisor.builder(chatMemory)
-                .order(20)
+                .order(Advisor.DEFAULT_CHAT_MEMORY_PRECEDENCE_ORDER) // so the memory advisor wraps the tool-call loop, and the {@code ToolCallingAdvisor} manages its own intermediate conversation history 
                 .build();
 
         List<KBDocument> allKbDocuments = kbDocumentRepository.findAll();
