@@ -84,6 +84,13 @@ export function KnowledgeBase() {
     }
   };
 
+  const handleUploadKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleUploadClick();
+    }
+  };
+
   const handleDelete = async (uuid: string) => {
     try {
       await deleteDocument(uuid);
@@ -107,8 +114,13 @@ export function KnowledgeBase() {
         <div
           className={`kb-upload-zone ${isUploading ? 'cursor-not-allowed opacity-75' : ''}`}
           onClick={handleUploadClick}
+          onKeyDown={handleUploadKeyDown}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
+          role="button"
+          tabIndex={isUploading ? -1 : 0}
+          aria-disabled={isUploading}
+          aria-label={isUploading ? 'Uploading document' : 'Click or drag your files here'}
         >
           {isUploading ? (
             <div className="flex flex-col items-center justify-center">
@@ -137,10 +149,10 @@ export function KnowledgeBase() {
           <table className="kb-table">
             <thead className="kb-table-header">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">File Name</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Uploaded At</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider w-24" style={{ textAlign: 'right' }}>Actions</th>
+              <th>File Name</th>
+              <th>Uploaded At</th>
+              <th>Status</th>
+              <th className="kb-actions-header">Actions</th>
             </tr>
             </thead>
             <tbody className="kb-table-body">
@@ -173,6 +185,7 @@ export function KnowledgeBase() {
                   <button 
                     className="kb-action-button" 
                     title="Download"
+                    aria-label={`Download document ${doc.fileName}`}
                     onClick={() => downloadDocument(doc.fileUuid, doc.fileName)}
                   >
                     <Download className="kb-action-button-icon" />
@@ -180,6 +193,7 @@ export function KnowledgeBase() {
                   <button 
                     className="kb-action-button delete" 
                     title="Delete"
+                    aria-label={`Delete document ${doc.fileName}`}
                     onClick={() => handleDelete(doc.fileUuid)}
                   >
                     <Trash2 className="kb-action-button-icon" />

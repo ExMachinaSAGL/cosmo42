@@ -36,6 +36,8 @@ const deleteChatSpy = vi.spyOn(apiClient, 'deleteChat');
 describe('Sidebar Component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
+    document.documentElement.removeAttribute('data-theme');
     fetchChatListSpy.mockResolvedValue(mockChats);
   });
 
@@ -84,17 +86,49 @@ describe('Sidebar Component', () => {
     expect(screen.getByText('Chat 1')).toBeInTheDocument();
   });
 
-  it('navigates to home and shows toast when New Chat is clicked', () => {
+  it('navigates to home and shows toast when New Chat is clicked', async () => {
     render(
       <MemoryRouter>
         <Sidebar />
       </MemoryRouter>
     );
 
+    await waitFor(() => expect(screen.getByText('Chat 1')).toBeInTheDocument());
+
     const newChatButton = screen.getByTitle('New Chat');
     fireEvent.click(newChatButton);
 
     expect(mockNavigate).toHaveBeenCalledWith('/chat');
+  });
+
+  it('toggles the persisted color theme', async () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Chat 1')).toBeInTheDocument());
+
+    const toggle = screen.getByRole('button', { name: /switch to dark theme/i });
+    fireEvent.click(toggle);
+
+    expect(document.documentElement).toHaveAttribute('data-theme', 'dark');
+    expect(localStorage.getItem('cosmo42-theme')).toBe('dark');
+    expect(screen.getByRole('button', { name: /switch to light theme/i })).toBeInTheDocument();
+  });
+
+  it('does not persist the inferred system theme before the user toggles it', async () => {
+    render(
+      <MemoryRouter>
+        <Sidebar />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => expect(screen.getByText('Chat 1')).toBeInTheDocument());
+
+    expect(document.documentElement.dataset.theme).toMatch(/light|dark/);
+    expect(localStorage.getItem('cosmo42-theme')).toBeNull();
   });
 
   describe('Chat Actions', () => {
@@ -116,6 +150,9 @@ describe('Sidebar Component', () => {
       fireEvent.click(renameMenuButton);
 
       // Verify modal is shown
+      expect(screen.getByRole('dialog', { name: 'Rename Chat' })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /chat title/i })).toBeInTheDocument();
+      expect(screen.getByRole('textbox', { name: /chat title/i })).toHaveFocus();
       const input = screen.getByDisplayValue('Chat 1');
       fireEvent.change(input, { target: { value: newTitle } });
 
@@ -210,7 +247,28 @@ describe('Sidebar Component', () => {
         await waitFor(() => {
           expect(toast.error).toHaveBeenCalledWith('Failed to delete chat');
           expect(screen.getByText('Chat 1')).toBeInTheDocument(); // Chat remains in the list
-        });
       });
+    });
+
+    it('closes a modal with Escape', async () => {
+      render(
+        <MemoryRouter>
+          <Sidebar />
+        </MemoryRouter>
+      );
+      await waitFor(() => expect(screen.getByText('Chat 1')).toBeInTheDocument());
+
+      const optionsButton = screen.getAllByTitle('Options')[0];
+      fireEvent.click(optionsButton);
+
+      const deleteMenuButton = screen.getByText('Delete');
+      fireEvent.click(deleteMenuButton);
+
+      expect(screen.getByRole('dialog', { name: 'Delete Chat' })).toBeInTheDocument();
+
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(screen.queryByRole('dialog', { name: 'Delete Chat' })).not.toBeInTheDocument();
+    });
   });
 });

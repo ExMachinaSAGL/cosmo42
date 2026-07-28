@@ -78,6 +78,25 @@ describe('KnowledgeBase', () => {
     });
   });
 
+  it('opens the file picker from the keyboard-accessible upload zone', async () => {
+    (apiClient.fetchDocuments as Mock).mockResolvedValue([]);
+
+    render(<KnowledgeBase />);
+
+    await waitFor(() => {
+      expect(apiClient.fetchDocuments).toHaveBeenCalled();
+    });
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+    const clickSpy = vi.spyOn(input, 'click').mockImplementation(() => {});
+    const uploadZone = screen.getByRole('button', { name: /click or drag your files here/i });
+
+    fireEvent.keyDown(uploadZone, { key: 'Enter' });
+    fireEvent.keyDown(uploadZone, { key: ' ' });
+
+    expect(clickSpy).toHaveBeenCalledTimes(2);
+  });
+
   it('handles document deletion', async () => {
     const mockDocuments = [
       { fileUuid: '1', fileName: 'document1.pdf', uploadedAt: new Date().toISOString(), status: 'ready', progressPercent: 100 },
@@ -91,7 +110,7 @@ describe('KnowledgeBase', () => {
       expect(screen.getByText('document1.pdf')).toBeInTheDocument();
     });
 
-    const deleteButton = screen.getByTitle('Delete');
+    const deleteButton = screen.getByRole('button', { name: /delete document/i });
     fireEvent.click(deleteButton);
 
     await waitFor(() => {
@@ -113,7 +132,7 @@ describe('KnowledgeBase', () => {
       expect(screen.getByText('document1.pdf')).toBeInTheDocument();
     });
 
-    const downloadButton = screen.getByTitle('Download');
+    const downloadButton = screen.getByRole('button', { name: /download document/i });
     fireEvent.click(downloadButton);
 
     expect(apiClient.downloadDocument).toHaveBeenCalledWith('1', 'document1.pdf');
