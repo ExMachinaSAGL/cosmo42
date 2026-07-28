@@ -78,8 +78,8 @@ class ChatConversationCrudE2ETest extends AbstractIntegrationTest {
         String uuid = UUID.randomUUID().toString();
         seed(uuid, "Chat", LocalDateTime.now());
         jdbcTemplate.update(
-                "INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp) VALUES (?, ?, ?, ?)",
-                uuid, "hi", "USER", LocalDateTime.now());
+                "INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp, sequence_id) VALUES (?, ?, ?, ?, ?)",
+                uuid, "hi", "USER", LocalDateTime.now(), 0);
 
         client.get().uri("/api/v1/chat/" + uuid)
                 .exchange()
@@ -110,11 +110,11 @@ class ChatConversationCrudE2ETest extends AbstractIntegrationTest {
         String uuid = UUID.randomUUID().toString();
         seed(uuid, "Doomed", LocalDateTime.now());
         jdbcTemplate.update(
-                "INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp) VALUES (?, ?, ?, ?)",
-                uuid, "m1", "USER", LocalDateTime.now());
+                "INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp, sequence_id) VALUES (?, ?, ?, ?, ?)",
+                uuid, "m1", "USER", LocalDateTime.now(), 0);
         jdbcTemplate.update(
-                "INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp) VALUES (?, ?, ?, ?)",
-                uuid, "m2", "ASSISTANT", LocalDateTime.now());
+                "INSERT INTO SPRING_AI_CHAT_MEMORY (conversation_id, content, type, timestamp, sequence_id) VALUES (?, ?, ?, ?, ?)",
+                uuid, "m2", "ASSISTANT", LocalDateTime.now(), 1);
 
         client.delete().uri("/api/v1/chat/" + uuid)
                 .exchange()
