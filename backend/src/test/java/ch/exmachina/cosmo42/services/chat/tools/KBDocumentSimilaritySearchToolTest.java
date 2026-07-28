@@ -53,13 +53,13 @@ class KBDocumentSimilaritySearchToolTest {
     void embedsQueryAndCallsRepositoryWithConvertedVector() {
         float[] queryVec = Fixtures.unitVector(1024, 0);
         EmbeddingMocks.stubWithFixedVector(embeddingModel, queryVec);
-        when(chunkRepository.findMostSimilarByCosine(any(), eq(0.5), eq(10)))
+        when(chunkRepository.findMostSimilarByCosine(any(), any(), eq(10)))
                 .thenReturn(List.of());
 
-        tool.search(request("alpha beta gamma"), emptyContext());
+        tool.search("alpha beta gamma", emptyContext());
 
         ArgumentCaptor<byte[]> bytesCap = ArgumentCaptor.forClass(byte[].class);
-        verify(chunkRepository).findMostSimilarByCosine(bytesCap.capture(), eq(0.5), eq(10));
+        verify(chunkRepository).findMostSimilarByCosine(bytesCap.capture(), any(), eq(10));
         assertThat(bytesCap.getValue()).isEqualTo(converter.convertToDatabaseColumn(queryVec));
     }
 
@@ -70,7 +70,7 @@ class KBDocumentSimilaritySearchToolTest {
         when(chunkRepository.findMostSimilarByCosine(any(), any(), any(Integer.class)))
                 .thenReturn(List.of());
 
-        tool.search(request("hello world"), emptyContext());
+        tool.search("hello world", emptyContext());
 
         ArgumentCaptor<EmbeddingRequest> reqCap = ArgumentCaptor.forClass(EmbeddingRequest.class);
         verify(embeddingModel).call(reqCap.capture());
@@ -89,7 +89,7 @@ class KBDocumentSimilaritySearchToolTest {
                 .thenReturn(List.of(chunk1, chunk2));
 
         KBDocumentSimilaritySearchTool.KBSimilaritySearchResponse response =
-                tool.search(request("q"), emptyContext());
+                tool.search("q", emptyContext());
 
         assertThat(response.chunks())
                 .containsExactly(
@@ -104,7 +104,7 @@ class KBDocumentSimilaritySearchToolTest {
                 .thenReturn(List.of());
 
         KBDocumentSimilaritySearchTool.KBSimilaritySearchResponse response =
-                tool.search(request("nothing matches"), emptyContext());
+                tool.search("nothing matches", emptyContext());
 
         assertThat(response.chunks()).isEmpty();
     }
@@ -118,7 +118,7 @@ class KBDocumentSimilaritySearchToolTest {
         Sinks.Many<ServerSentEvent<ChatResponseDTO>> sink =
                 Sinks.many().multicast().onBackpressureBuffer();
 
-        tool.search(request("q"), contextWithSink(sink));
+        tool.search("q", contextWithSink(sink));
         sink.tryEmitComplete();
 
         StepVerifier.create(sink.asFlux())
@@ -138,7 +138,7 @@ class KBDocumentSimilaritySearchToolTest {
 
         // No SINK key in the context map at all.
         KBDocumentSimilaritySearchTool.KBSimilaritySearchResponse response =
-                tool.search(request("q"), new ToolContext(new HashMap<>()));
+                tool.search("q", new ToolContext(new HashMap<>()));
 
         assertThat(response.chunks()).isEmpty();
     }
@@ -148,7 +148,7 @@ class KBDocumentSimilaritySearchToolTest {
         when(embeddingModel.call(any(EmbeddingRequest.class)))
                 .thenThrow(new RuntimeException("Embedding service down"));
 
-        assertThatThrownBy(() -> tool.search(request("q"), emptyContext()))
+        assertThatThrownBy(() -> tool.search("q", emptyContext()))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("Embedding service down");
     }
@@ -163,7 +163,7 @@ class KBDocumentSimilaritySearchToolTest {
         KBDocumentSimilaritySearchTool toolWithFailingConverter = new KBDocumentSimilaritySearchTool(
                 embeddingModel, embeddingOptions, throwingConverter, chunkRepository);
 
-        assertThatThrownBy(() -> toolWithFailingConverter.search(request("q"), emptyContext()))
+        assertThatThrownBy(() -> toolWithFailingConverter.search("q", emptyContext()))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Invalid vector");
     }
@@ -174,13 +174,9 @@ class KBDocumentSimilaritySearchToolTest {
         when(chunkRepository.findMostSimilarByCosine(any(), any(), any(Integer.class)))
                 .thenThrow(new RuntimeException("DB connection lost"));
 
-        assertThatThrownBy(() -> tool.search(request("q"), emptyContext()))
+        assertThatThrownBy(() -> tool.search("q", emptyContext()))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("DB connection lost");
-    }
-
-    private static KBDocumentSimilaritySearchTool.KBSimilaritySearchRequest request(String query) {
-        return new KBDocumentSimilaritySearchTool.KBSimilaritySearchRequest(query);
     }
 
     private static ToolContext emptyContext() {
