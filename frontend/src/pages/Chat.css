@@ -3,21 +3,27 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background-color: var(--bg);
+  background-color: var(--color-bg);
   position: relative;
 }
 
 .chat-header {
   padding: 1rem; /* p-4 */
-  border-bottom: 1px solid var(--gray-200);
-  background-color: var(--bg);
+  border-bottom: 1px solid var(--color-border);
+  background-color: var(--color-surface);
 }
 
 .chat-header-title {
   font-size: 1.125rem; /* text-lg */
   line-height: 1.75rem; /* text-lg */
   font-weight: 600; /* font-semibold */
-  color: var(--gray-800);
+  color: var(--color-heading);
+}
+
+.chat-empty-state {
+  margin-top: 40px;
+  text-align: center;
+  color: var(--color-text-muted);
 }
 
 .chat-messages-area {
@@ -61,13 +67,13 @@
 }
 
 .chat-avatar.user {
-  background-color: var(--blue-600);
-  color: var(--bg);
+  background-color: var(--color-primary);
+  color: var(--color-primary-contrast);
 }
 
 .chat-avatar.assistant {
-  background-color: var(--green-600);
-  color: var(--bg);
+  background-color: var(--color-success);
+  color: var(--color-success-contrast);
 }
 
 .chat-message-bubble {
@@ -80,14 +86,15 @@
 }
 
 .chat-message-bubble.user {
-  background-color: var(--blue-600);
-  color: var(--bg);
+  background-color: var(--color-primary);
+  color: var(--color-primary-contrast);
   border-top-right-radius: 0; /* rounded-tr-none */
 }
 
 .chat-message-bubble.assistant {
-  background-color: var(--gray-100);
-  color: var(--gray-800);
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
   border-top-left-radius: 0; /* rounded-tl-none */
 }
 
@@ -98,12 +105,38 @@
   line-height: 1.25rem; /* text-sm */
 }
 
+.chat-message-content p {
+  margin: 0;
+}
+
+.chat-message-text {
+  white-space: pre-wrap;
+}
+
+.chat-message-content a {
+  color: var(--color-primary);
+}
+
+.chat-message-content code {
+  background: var(--color-code-bg);
+  color: var(--color-heading);
+  border-radius: 0.25rem;
+  padding: 0.1rem 0.25rem;
+}
+
+.chat-message-status {
+  margin: 0 0 4px;
+  color: var(--color-text-muted);
+  font-size: 0.8em;
+  font-style: italic;
+}
+
 .chat-input-area {
   position: absolute;
   bottom: 0;
   width: 100%;
-  background-color: var(--bg);
-  border-top: 1px solid var(--gray-200);
+  background-color: color-mix(in srgb, var(--color-surface) 94%, transparent);
+  border-top: 1px solid var(--color-border);
   padding: 1rem; /* p-4 */
 }
 
@@ -126,21 +159,27 @@
   padding-top: 0.75rem; /* py-3 */
   padding-bottom: 0.75rem; /* py-3 */
   border-radius: 0.75rem; /* rounded-xl */
-  border: 1px solid #cbd5e0; /* border border-gray-300 */
+  border: 1px solid var(--color-border-strong);
   outline: none; /* focus:outline-none */
-  background-color: var(--gray-50);
-  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-surface);
+}
+
+.chat-input-field::placeholder {
+  color: var(--color-text-muted);
 }
 
 .chat-input-field:focus {
-  border-color: transparent; /* focus:border-transparent */
-  box-shadow: 0 0 0 2px #bfdbfe, 0 0 0 4px #3b82f6; /* focus:ring-2 focus:ring-blue-500 */
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-focus) 35%, transparent);
 }
 
 .chat-send-button {
   padding: 0.5rem; /* p-2 */
-  background-color: var(--blue-600);
-  color: var(--bg);
+  background-color: var(--color-primary);
+  color: var(--color-primary-contrast);
+  border: 1px solid transparent;
   border-radius: 0.5rem; /* rounded-lg */
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter; /* transition-colors */
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); /* transition-colors */
@@ -148,7 +187,7 @@
 }
 
 .chat-send-button:hover {
-  background-color: #1d4ed8; /* hover:bg-blue-700 */
+  background-color: var(--color-primary-hover);
 }
 
 .chat-send-button:disabled {
@@ -164,5 +203,5 @@
 .chat-disclaimer-text {
   font-size: 0.75rem; /* text-xs */
   line-height: 1rem; /* text-xs */
-  color: var(--gray-400);
+  color: var(--color-text-muted);
 }

@@ -354,7 +354,7 @@ export function Chat() {
       <div className="chat-messages-area">
         <div className="chat-messages-container">
           {messages.length === 0 ? (
-            <div className="chat-empty-state" style={{ textAlign: 'center', marginTop: '40px', color: '#666' }}>
+            <div className="chat-empty-state">
               <p>Start a new conversation by typing a message below.</p>
             </div>
           ) : (
@@ -367,7 +367,7 @@ export function Chat() {
 
                 {/* Message bubble */}
                 <div className={`chat-message-bubble ${msg.role === 'user' ? 'user' : 'assistant'}`}>
-                  {msg.status && <p className="chat-message-status" style={{ fontStyle: 'italic', fontSize: '0.8em', color: '#888', marginBottom: '4px' }}>{msg.status}...</p>}
+                  {msg.status && <p className="chat-message-status">{msg.status}...</p>}
                   {msg.content && (
                     <div className="chat-message-content">
                       {msg.role === 'assistant' ? (
@@ -375,7 +375,7 @@ export function Chat() {
                           {msg.content}
                         </ReactMarkdown>
                       ) : (
-                        <p style={{ whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+                        <p className="chat-message-text">{msg.content}</p>
                       )}
                     </div>
                   )}
