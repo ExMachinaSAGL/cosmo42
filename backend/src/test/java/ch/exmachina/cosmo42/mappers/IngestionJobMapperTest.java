@@ -39,7 +39,7 @@ class IngestionJobMapperTest {
         @Test
         void serializesPageWithTextChunks() {
             DocumentPage page = new DocumentPage(List.of(
-                    new Chunk(ChunkType.text, "Hello world", null, false)));
+                    new Chunk(ChunkType.TEXT, "Hello world", null, false)));
 
             String json = mapper.toChunksJson(page);
 
@@ -50,7 +50,7 @@ class IngestionJobMapperTest {
         @Test
         void serializesPageWithTableChunks() {
             DocumentPage page = new DocumentPage(List.of(
-                    new Chunk(ChunkType.table, "| A | B |", "Sales summary", false)));
+                    new Chunk(ChunkType.TABLE, "| A | B |", "Sales summary", false)));
 
             String json = mapper.toChunksJson(page);
 
@@ -62,8 +62,8 @@ class IngestionJobMapperTest {
         @Test
         void serializesPageWithMultipleChunks() {
             DocumentPage page = new DocumentPage(List.of(
-                    new Chunk(ChunkType.text, "First paragraph", null, false),
-                    new Chunk(ChunkType.table, "| X |", "Overview", false)));
+                    new Chunk(ChunkType.TEXT, "First paragraph", null, false),
+                    new Chunk(ChunkType.TABLE, "| X |", "Overview", false)));
 
             String json = mapper.toChunksJson(page);
 
@@ -94,7 +94,7 @@ class IngestionJobMapperTest {
         @Test
         void serializesChunkWithContinueFlag() {
             DocumentPage page = new DocumentPage(List.of(
-                    new Chunk(ChunkType.text, "to be continued", null, true)));
+                    new Chunk(ChunkType.TEXT, "to be continued", null, true)));
 
             String json = mapper.toChunksJson(page);
 
@@ -115,7 +115,7 @@ class IngestionJobMapperTest {
             DocumentPage page = mapper.toDocumentPage(entity);
 
             assertThat(page.getChunks()).hasSize(1);
-            assertThat(page.getChunks().getFirst().getType()).isEqualTo(ChunkType.text);
+            assertThat(page.getChunks().getFirst().getType()).isEqualTo(ChunkType.TEXT);
             assertThat(page.getChunks().getFirst().getContent()).isEqualTo("Hello");
         }
 
@@ -128,7 +128,7 @@ class IngestionJobMapperTest {
 
             DocumentPage page = mapper.toDocumentPage(entity);
 
-            assertThat(page.getChunks().getFirst().getType()).isEqualTo(ChunkType.table);
+            assertThat(page.getChunks().getFirst().getType()).isEqualTo(ChunkType.TABLE);
             assertThat(page.getChunks().getFirst().getSummary()).isEqualTo("Data");
         }
 
@@ -169,9 +169,9 @@ class IngestionJobMapperTest {
         @Test
         void roundTripPreservesData() {
             DocumentPage original = new DocumentPage(List.of(
-                    new Chunk(ChunkType.text, "Paragraph one", null, false),
-                    new Chunk(ChunkType.table, "| Col |", "Table info", false),
-                    new Chunk(ChunkType.text, "cut off", null, true)));
+                    new Chunk(ChunkType.TEXT, "Paragraph one", null, false),
+                    new Chunk(ChunkType.TABLE, "| Col |", "Table info", false),
+                    new Chunk(ChunkType.TEXT, "cut off", null, true)));
 
             String json = mapper.toChunksJson(original);
             IngestionJobPage entity = new IngestionJobPage();
@@ -179,9 +179,9 @@ class IngestionJobMapperTest {
             DocumentPage roundTripped = mapper.toDocumentPage(entity);
 
             assertThat(roundTripped.getChunks()).hasSize(3);
-            assertThat(roundTripped.getChunks().get(0).getType()).isEqualTo(ChunkType.text);
+            assertThat(roundTripped.getChunks().get(0).getType()).isEqualTo(ChunkType.TEXT);
             assertThat(roundTripped.getChunks().get(0).getContent()).isEqualTo("Paragraph one");
-            assertThat(roundTripped.getChunks().get(1).getType()).isEqualTo(ChunkType.table);
+            assertThat(roundTripped.getChunks().get(1).getType()).isEqualTo(ChunkType.TABLE);
             assertThat(roundTripped.getChunks().get(1).getSummary()).isEqualTo("Table info");
             assertThat(roundTripped.getChunks().get(2).getContinuesOnNextPage()).isTrue();
         }

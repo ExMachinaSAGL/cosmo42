@@ -1,6 +1,7 @@
 package ch.exmachina.cosmo42.services.kb.schema;
 
 import com.fasterxml.jackson.annotation.JsonPropertyDescription;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

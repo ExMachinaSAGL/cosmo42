@@ -173,7 +173,7 @@ class IngestionPipelineAsyncE2ETest extends AbstractWebIntegrationTest {
 
     private static Chunk textChunk(String content) {
         Chunk c = new Chunk();
-        c.setType(ChunkType.text);
+        c.setType(ChunkType.TEXT);
         c.setContent(content);
         c.setContinuesOnNextPage(false);
         return c;

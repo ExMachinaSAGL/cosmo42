@@ -145,7 +145,7 @@ class KBDocumentChunkerTest {
 
         DocumentPage page = results.get(0);
         assertThat(page.getChunks()).hasSize(1);
-        assertThat(page.getChunks().getFirst().getType()).isEqualTo(ChunkType.table);
+        assertThat(page.getChunks().getFirst().getType()).isEqualTo(ChunkType.TABLE);
         assertThat(page.getChunks().getFirst().getContent()).isEqualTo("| A | B |");
         assertThat(page.getChunks().getFirst().getSummary()).isEqualTo("Sales data");
     }

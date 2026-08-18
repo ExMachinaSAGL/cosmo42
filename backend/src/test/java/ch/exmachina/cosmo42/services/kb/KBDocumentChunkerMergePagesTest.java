@@ -120,7 +120,7 @@ class KBDocumentChunkerMergePagesTest {
     }
 
     private static Chunk chunk(String type, String content, String summary, boolean continues) {
-        return new Chunk(ChunkType.valueOf(type), content, summary, continues);
+        return new Chunk(ChunkType.fromLabel(type), content, summary, continues);
     }
 
     private static DocumentPage pageWith(Chunk... chunks) {

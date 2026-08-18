@@ -3,7 +3,6 @@ package ch.exmachina.cosmo42.services;
 import ch.exmachina.cosmo42.entities.IngestionJob;
 import ch.exmachina.cosmo42.entities.KBDocument;
 import ch.exmachina.cosmo42.entities.KBDocumentChunk;
-import ch.exmachina.cosmo42.entities.KBDocumentChunkType;
 import ch.exmachina.cosmo42.repositories.KBDocumentChunkRepository;
 import ch.exmachina.cosmo42.repositories.KBDocumentRepository;
 import ch.exmachina.cosmo42.services.fs.FileService;
@@ -12,6 +11,7 @@ import ch.exmachina.cosmo42.services.kb.KBDocumentChunker;
 import ch.exmachina.cosmo42.config.IngestionProperties;
 import ch.exmachina.cosmo42.services.kb.schema.Chunk;
 import ch.exmachina.cosmo42.services.kb.schema.DocumentPage;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -143,11 +143,11 @@ public class KBDocumentIngestionProcessor {
                 KBDocumentChunk kbChunk = new KBDocumentChunk();
                 kbChunk.setUuid(UUID.randomUUID().toString());
                 kbChunk.setKbDocument(kbDocument);
-                kbChunk.setType(KBDocumentChunkType.fromLabel(chunk.getType().name(), KBDocumentChunkType.TEXT));
+                kbChunk.setType(chunk.getType());
                 kbChunk.setContent(chunk.getContent());
                 kbChunk.setSummary(chunk.getSummary());
 
-                boolean isTable = kbChunk.getType() == KBDocumentChunkType.TABLE;
+                boolean isTable = kbChunk.getType() == ChunkType.TABLE;
                 if(isTable) {
                     chunks.add(kbChunk);
                     toEmbed.add(kbChunk.getSummary());

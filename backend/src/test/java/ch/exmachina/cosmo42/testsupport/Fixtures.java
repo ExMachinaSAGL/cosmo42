@@ -3,10 +3,10 @@ package ch.exmachina.cosmo42.testsupport;
 import ch.exmachina.cosmo42.entities.ChatConversation;
 import ch.exmachina.cosmo42.entities.KBDocument;
 import ch.exmachina.cosmo42.entities.KBDocumentChunk;
-import ch.exmachina.cosmo42.entities.KBDocumentChunkType;
 import ch.exmachina.cosmo42.services.kb.schema.Chunk;
 import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 import ch.exmachina.cosmo42.services.kb.schema.DocumentPage;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ public final class Fixtures {
     }
 
     public static KBDocumentChunk chunk(KBDocument doc,
-                                        KBDocumentChunkType type,
+                                        ChunkType type,
                                         String content,
                                         float[] embedding) {
         KBDocumentChunk c = new KBDocumentChunk();
@@ -79,7 +79,7 @@ public final class Fixtures {
 
     public static Chunk textChunk(String content) {
         Chunk c = new Chunk();
-        c.setType(ChunkType.text);
+        c.setType(ChunkType.TEXT);
         c.setContent(content);
         c.setContinuesOnNextPage(false);
         return c;
@@ -87,7 +87,7 @@ public final class Fixtures {
 
     public static Chunk tableChunk(String content, String summary) {
         Chunk c = new Chunk();
-        c.setType(ChunkType.table);
+        c.setType(ChunkType.TABLE);
         c.setContent(content);
         c.setSummary(summary);
         c.setContinuesOnNextPage(false);

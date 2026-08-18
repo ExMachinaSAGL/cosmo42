@@ -165,7 +165,7 @@ public class KBDocumentChunker {
 			List<Chunk> outChunks = chunks.stream().limit(chunks.size() - 1).collect(toList());
 			var lastChunk = chunks.getLast();
 			if (lastChunk.getContinuesOnNextPage()) {
-				lastChunk = joinConitnuingChunks(lastChunk, i, orderedPages);
+				lastChunk = joinContinuingChunks(lastChunk, i, orderedPages);
 			}
 			outChunks.add(lastChunk);
 			merged.add(new DocumentPage(outChunks));
@@ -177,10 +177,10 @@ public class KBDocumentChunker {
 		return nonNull(page) && nonNull(page.getValue()) && nonNull(page.getValue().getChunks());
 	}
 
-	private Chunk joinConitnuingChunks(Chunk start, int from, List<Map.Entry<Integer, DocumentPage>> orderedPages) {
-		for (; start.getContinuesOnNextPage() && from < orderedPages.size() - 1;) {
-			var page = orderedPages.get(from);
-			var nextPage = orderedPages.get(++from);
+	private Chunk joinContinuingChunks(Chunk start, final int from, List<Map.Entry<Integer, DocumentPage>> orderedPages) {
+		for (var i = from; start.getContinuesOnNextPage() && i < orderedPages.size() - 1;) {
+			var page = orderedPages.get(i);
+			var nextPage = orderedPages.get(++i);
 			if (nextPage.getKey() == page.getKey() + 1) {
 				var chunks = nextPage.getValue().getChunks();
 				var continuationChunk = chunks.stream()

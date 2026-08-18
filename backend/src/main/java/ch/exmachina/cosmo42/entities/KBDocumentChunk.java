@@ -1,6 +1,7 @@
 package ch.exmachina.cosmo42.entities;
 
 import ch.exmachina.cosmo42.entities.converters.VectorAttributeConverter;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -23,7 +24,7 @@ public class KBDocumentChunk extends BaseEntity {
 
     @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
-    KBDocumentChunkType type;
+    ChunkType type;
 
     @Column(name = "content", nullable = false)
     String content;

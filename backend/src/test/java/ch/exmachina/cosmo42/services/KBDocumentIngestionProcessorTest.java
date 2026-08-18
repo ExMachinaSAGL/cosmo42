@@ -99,14 +99,14 @@ class KBDocumentIngestionProcessorTest {
 
         doAnswer(inv -> {
             BiConsumer<Integer, DocumentPage> cb = inv.getArgument(2);
-            cb.accept(0, new DocumentPage(List.of(new Chunk(ChunkType.text, "a", null, false))));
-            cb.accept(1, new DocumentPage(List.of(new Chunk(ChunkType.text, "b", null, false))));
+            cb.accept(0, new DocumentPage(List.of(new Chunk(ChunkType.TEXT, "a", null, false))));
+            cb.accept(1, new DocumentPage(List.of(new Chunk(ChunkType.TEXT, "b", null, false))));
             return null;
         }).when(kbDocumentChunker).processPages(any(), any(), any());
         when(ingestionJobService.countExhaustedFailures(any(), eq(MAX_ATTEMPTS))).thenReturn(0L);
         when(ingestionJobService.loadCompletedPages(any())).thenReturn(List.of(
-                entry(1, new DocumentPage(List.of(new Chunk(ChunkType.text, "a", null, false)))),
-                entry(2, new DocumentPage(List.of(new Chunk(ChunkType.text, "b", null, false))))));
+                entry(1, new DocumentPage(List.of(new Chunk(ChunkType.TEXT, "a", null, false)))),
+                entry(2, new DocumentPage(List.of(new Chunk(ChunkType.TEXT, "b", null, false))))));
         when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> ((List<Map.Entry>)inv.getArgument(0)).stream().map(Map.Entry::getValue).toList());
         when(kbDocumentRepository.findByUuid(anyString())).thenReturn(Optional.of(kbDoc("stored-uuid")));
         when(embeddingModel.call(any(EmbeddingRequest.class))).thenReturn(embedResponse(2));
@@ -228,7 +228,7 @@ class KBDocumentIngestionProcessorTest {
                 .thenReturn(new LinkedHashSet<>());
         when(ingestionJobService.countExhaustedFailures(any(), eq(MAX_ATTEMPTS))).thenReturn(0L);
         when(ingestionJobService.loadCompletedPages(any())).thenReturn(List.of(
-                entry(1, new DocumentPage(List.of(new Chunk(ChunkType.table, "| a |", "tbl-summary", false))))));
+                entry(1, new DocumentPage(List.of(new Chunk(ChunkType.TABLE, "| a |", "tbl-summary", false))))));
         when(kbDocumentChunker.mergePages(any())).thenAnswer(inv -> ((List<Map.Entry>)inv.getArgument(0)).stream().map(Map.Entry::getValue).toList());
         when(kbDocumentRepository.findByUuid("kb-uuid")).thenReturn(Optional.of(kbDoc("kb-uuid")));
         when(embeddingModel.call(any(EmbeddingRequest.class))).thenReturn(embedResponse(1));
