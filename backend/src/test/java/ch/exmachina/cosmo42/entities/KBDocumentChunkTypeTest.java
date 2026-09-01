@@ -5,43 +5,44 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.NullSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class KBDocumentChunkTypeTest {
 
-    private static final KBDocumentChunkType FALLBACK = KBDocumentChunkType.TEXT;
-
     @Test
     void fromLabelReturnsTextForText() {
-        assertThat(KBDocumentChunkType.fromLabel("text", FALLBACK)).isEqualTo(KBDocumentChunkType.TEXT);
+        assertThat(ChunkType.fromLabel("text")).isEqualTo(ChunkType.TEXT);
     }
 
     @Test
     void fromLabelReturnsTableForTable() {
-        assertThat(KBDocumentChunkType.fromLabel("table", FALLBACK)).isEqualTo(KBDocumentChunkType.TABLE);
+        assertThat(ChunkType.fromLabel("table")).isEqualTo(ChunkType.TABLE);
     }
 
     @Test
     void fromLabelReturnsImageForImage() {
-        assertThat(KBDocumentChunkType.fromLabel("image", FALLBACK)).isEqualTo(KBDocumentChunkType.IMAGE);
+        assertThat(ChunkType.fromLabel("image")).isEqualTo(ChunkType.IMAGE);
     }
 
     @Test
-    void fromLabelIsCaseInsensitive() {
-        assertThat(KBDocumentChunkType.fromLabel("TEXT", FALLBACK)).isEqualTo(KBDocumentChunkType.TEXT);
-        assertThat(KBDocumentChunkType.fromLabel("Table", FALLBACK)).isEqualTo(KBDocumentChunkType.TABLE);
-        assertThat(KBDocumentChunkType.fromLabel("IMAGE", FALLBACK)).isEqualTo(KBDocumentChunkType.IMAGE);
+    void fromLabelIsCaseSensitive() {
+    	assertThatThrownBy(() -> ChunkType.fromLabel("TEXT")).isExactlyInstanceOf(IllegalArgumentException.class);
+    	assertThatThrownBy(() -> ChunkType.fromLabel("Table")).isExactlyInstanceOf(IllegalArgumentException.class);
+    	assertThatThrownBy(() -> ChunkType.fromLabel("IMAGE")).isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"", "video", "unknown", "pdf", "  text  "})
-    void fromLabelReturnsFallbackForUnknownValues(String label) {
-        assertThat(KBDocumentChunkType.fromLabel(label, FALLBACK)).isEqualTo(FALLBACK);
+    void fromLabelFailsForUnknownValues(String label) {
+    	assertThatThrownBy(() -> ChunkType.fromLabel(label)).isExactlyInstanceOf(IllegalArgumentException.class);
     }
 
     @ParameterizedTest
     @NullSource
     void fromLabelReturnsFallbackForNull(String label) {
-        assertThat(KBDocumentChunkType.fromLabel(label, FALLBACK)).isEqualTo(FALLBACK);
+    	assertThatThrownBy(() -> ChunkType.fromLabel(label)).isExactlyInstanceOf(IllegalArgumentException.class);
     }
 }
