@@ -4,10 +4,10 @@ import ch.exmachina.cosmo42.dto.ChatEventType;
 import ch.exmachina.cosmo42.dto.ChatResponseDTO;
 import ch.exmachina.cosmo42.entities.KBDocument;
 import ch.exmachina.cosmo42.entities.KBDocumentChunk;
-import ch.exmachina.cosmo42.entities.KBDocumentChunkType;
 import ch.exmachina.cosmo42.entities.converters.VectorAttributeConverter;
 import ch.exmachina.cosmo42.repositories.KBDocumentChunkRepository;
 import ch.exmachina.cosmo42.services.chat.ChatAttribute;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
 import ch.exmachina.cosmo42.testsupport.EmbeddingMocks;
 import ch.exmachina.cosmo42.testsupport.Fixtures;
 import org.junit.jupiter.api.BeforeEach;
@@ -83,8 +83,8 @@ class KBDocumentSimilaritySearchToolTest {
         EmbeddingMocks.stubWithFixedVector(embeddingModel, Fixtures.zeroVector(1024));
         KBDocument doc1 = Fixtures.document("doc-uuid-1", "first.pdf");
         KBDocument doc2 = Fixtures.document("doc-uuid-2", "second.pdf");
-        KBDocumentChunk chunk1 = Fixtures.chunk(doc1, KBDocumentChunkType.TEXT, "first content", Fixtures.zeroVector(1024));
-        KBDocumentChunk chunk2 = Fixtures.chunk(doc2, KBDocumentChunkType.TABLE, "second content", Fixtures.zeroVector(1024));
+        KBDocumentChunk chunk1 = Fixtures.chunk(doc1, ChunkType.TEXT, "first content", Fixtures.zeroVector(1024));
+        KBDocumentChunk chunk2 = Fixtures.chunk(doc2, ChunkType.TABLE, "second content", Fixtures.zeroVector(1024));
         when(chunkRepository.findMostSimilarByCosine(any(), any(), any(Integer.class)))
                 .thenReturn(List.of(chunk1, chunk2));
 

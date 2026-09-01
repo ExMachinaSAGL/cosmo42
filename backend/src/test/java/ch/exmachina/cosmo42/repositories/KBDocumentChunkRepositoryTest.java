@@ -3,8 +3,9 @@ package ch.exmachina.cosmo42.repositories;
 import ch.exmachina.cosmo42.AbstractIntegrationTest;
 import ch.exmachina.cosmo42.entities.KBDocument;
 import ch.exmachina.cosmo42.entities.KBDocumentChunk;
-import ch.exmachina.cosmo42.entities.KBDocumentChunkType;
 import ch.exmachina.cosmo42.entities.converters.VectorAttributeConverter;
+import ch.exmachina.cosmo42.services.kb.schema.ChunkType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,7 +115,7 @@ class KBDocumentChunkRepositoryTest extends AbstractIntegrationTest {
         KBDocumentChunk c = new KBDocumentChunk();
         c.setUuid(UUID.randomUUID().toString());
         c.setKbDocument(document);
-        c.setType(KBDocumentChunkType.TEXT);
+        c.setType(ChunkType.TEXT);
         c.setContent(content);
         c.setEmbedding(embedding);
         chunkRepository.saveAndFlush(c);
